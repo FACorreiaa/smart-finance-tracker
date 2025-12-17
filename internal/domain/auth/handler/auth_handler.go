@@ -5,6 +5,9 @@ import (
 	"errors"
 
 	"connectrpc.com/connect"
+	auth "github.com/FACorreiaa/loci-connect-proto/gen/go/loci/auth"
+	authconnect "github.com/FACorreiaa/loci-connect-proto/gen/go/loci/auth/authconnect"
+	commonpb "github.com/FACorreiaa/loci-connect-proto/gen/go/loci/common"
 
 	"github.com/FACorreiaa/smart-finance-tracker/internal/domain/auth/common"
 	"github.com/FACorreiaa/smart-finance-tracker/internal/domain/auth/presenter"

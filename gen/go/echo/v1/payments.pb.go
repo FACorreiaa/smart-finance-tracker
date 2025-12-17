@@ -609,8 +609,8 @@ const file_echo_v1_payments_proto_rawDesc = "" +
 	"\x0fPaymentsService\x12f\n" +
 	"\x15CreateCheckoutSession\x12%.echo.v1.CreateCheckoutSessionRequest\x1a&.echo.v1.CreateCheckoutSessionResponse\x12u\n" +
 	"\x1aCreateBillingPortalSession\x12*.echo.v1.CreateBillingPortalSessionRequest\x1a+.echo.v1.CreateBillingPortalSessionResponse\x12T\n" +
-	"\x0fGetEntitlements\x12\x1f.echo.v1.GetEntitlementsRequest\x1a .echo.v1.GetEntitlementsResponseBw\n" +
-	"\vcom.echo.v1B\rPaymentsProtoP\x01Z\x1aechoapi/gen/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
+	"\x0fGetEntitlements\x12\x1f.echo.v1.GetEntitlementsRequest\x1a .echo.v1.GetEntitlementsResponseB\x9e\x01\n" +
+	"\vcom.echo.v1B\rPaymentsProtoP\x01ZAgithub.com/FACorreiaa/smart-finance-tracker/gen/go/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
 
 var (
 	file_echo_v1_payments_proto_rawDescOnce sync.Once

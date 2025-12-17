@@ -7,8 +7,8 @@ package echov1connect
 import (
 	connect "connectrpc.com/connect"
 	context "context"
-	v1 "echoapi/gen/echo/v1"
 	errors "errors"
+	v1 "github.com/FACorreiaa/smart-finance-tracker/gen/go/echo/v1"
 	http "net/http"
 	strings "strings"
 )

@@ -491,8 +491,8 @@ const file_echo_v1_auth_proto_rawDesc = "" +
 	"\x05Login\x12\x15.echo.v1.LoginRequest\x1a\x15.echo.v1.AuthResponse\x129\n" +
 	"\aRefresh\x12\x17.echo.v1.RefreshRequest\x1a\x15.echo.v1.AuthResponse\x129\n" +
 	"\x06Logout\x12\x16.echo.v1.LogoutRequest\x1a\x17.echo.v1.LogoutResponse\x126\n" +
-	"\x05GetMe\x12\x15.echo.v1.GetMeRequest\x1a\x16.echo.v1.GetMeResponseBs\n" +
-	"\vcom.echo.v1B\tAuthProtoP\x01Z\x1aechoapi/gen/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
+	"\x05GetMe\x12\x15.echo.v1.GetMeRequest\x1a\x16.echo.v1.GetMeResponseB\x9a\x01\n" +
+	"\vcom.echo.v1B\tAuthProtoP\x01ZAgithub.com/FACorreiaa/smart-finance-tracker/gen/go/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
 
 var (
 	file_echo_v1_auth_proto_rawDescOnce sync.Once

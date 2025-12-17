@@ -1,0 +1,12 @@
+./admin.pb.go
+./auth.pb.go
+./automation.pb.go
+./common.pb.go
+./finance.pb.go
+./imports.pb.go
+./insights.pb.go
+./payments.pb.go
+./plaid.pb.go
+./spreadsheet.pb.go
+./users.pb.go
+./wealth.pb.go

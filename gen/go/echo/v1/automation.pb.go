@@ -1004,8 +1004,8 @@ const file_echo_v1_automation_proto_rawDesc = "" +
 	"\n" +
 	"DeleteRule\x12\x1a.echo.v1.DeleteRuleRequest\x1a\x1b.echo.v1.DeleteRuleResponse\x12B\n" +
 	"\tListTasks\x12\x19.echo.v1.ListTasksRequest\x1a\x1a.echo.v1.ListTasksResponse\x12K\n" +
-	"\fCompleteTask\x12\x1c.echo.v1.CompleteTaskRequest\x1a\x1d.echo.v1.CompleteTaskResponseBy\n" +
-	"\vcom.echo.v1B\x0fAutomationProtoP\x01Z\x1aechoapi/gen/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
+	"\fCompleteTask\x12\x1c.echo.v1.CompleteTaskRequest\x1a\x1d.echo.v1.CompleteTaskResponseB\xa0\x01\n" +
+	"\vcom.echo.v1B\x0fAutomationProtoP\x01ZAgithub.com/FACorreiaa/smart-finance-tracker/gen/go/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
 
 var (
 	file_echo_v1_automation_proto_rawDescOnce sync.Once

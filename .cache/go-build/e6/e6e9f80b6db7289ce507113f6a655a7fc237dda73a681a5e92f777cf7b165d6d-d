@@ -1,0 +1,11 @@
+./admin.connect.go
+./auth.connect.go
+./automation.connect.go
+./finance.connect.go
+./imports.connect.go
+./insights.connect.go
+./payments.connect.go
+./plaid.connect.go
+./spreadsheet.connect.go
+./users.connect.go
+./wealth.connect.go

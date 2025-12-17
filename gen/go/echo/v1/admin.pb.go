@@ -634,9 +634,9 @@ const file_echo_v1_admin_proto_rawDesc = "" +
 	"\n" +
 	"UpdateUser\x12\x1f.echo.v1.AdminUpdateUserRequest\x1a .echo.v1.AdminUpdateUserResponse\x12X\n" +
 	"\rSetUserStatus\x12\".echo.v1.AdminSetUserStatusRequest\x1a#.echo.v1.AdminSetUserStatusResponse\x12U\n" +
-	"\fSetUserRoles\x12!.echo.v1.AdminSetUserRolesRequest\x1a\".echo.v1.AdminSetUserRolesResponseBt\n" +
+	"\fSetUserRoles\x12!.echo.v1.AdminSetUserRolesRequest\x1a\".echo.v1.AdminSetUserRolesResponseB\x9b\x01\n" +
 	"\vcom.echo.v1B\n" +
-	"AdminProtoP\x01Z\x1aechoapi/gen/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
+	"AdminProtoP\x01ZAgithub.com/FACorreiaa/smart-finance-tracker/gen/go/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
 
 var (
 	file_echo_v1_admin_proto_rawDescOnce sync.Once

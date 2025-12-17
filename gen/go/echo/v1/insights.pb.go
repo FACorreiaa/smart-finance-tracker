@@ -711,8 +711,8 @@ const file_echo_v1_insights_proto_rawDesc = "" +
 	"\x0fInsightsService\x12]\n" +
 	"\x12GetMonthlyInsights\x12\".echo.v1.GetMonthlyInsightsRequest\x1a#.echo.v1.GetMonthlyInsightsResponse\x12E\n" +
 	"\n" +
-	"GetWrapped\x12\x1a.echo.v1.GetWrappedRequest\x1a\x1b.echo.v1.GetWrappedResponseBw\n" +
-	"\vcom.echo.v1B\rInsightsProtoP\x01Z\x1aechoapi/gen/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
+	"GetWrapped\x12\x1a.echo.v1.GetWrappedRequest\x1a\x1b.echo.v1.GetWrappedResponseB\x9e\x01\n" +
+	"\vcom.echo.v1B\rInsightsProtoP\x01ZAgithub.com/FACorreiaa/smart-finance-tracker/gen/go/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
 
 var (
 	file_echo_v1_insights_proto_rawDescOnce sync.Once

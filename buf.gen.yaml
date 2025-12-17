@@ -3,7 +3,7 @@ managed:
   enabled: true
   override:
     - file_option: go_package
-      value: echoapi/gen/echo/v1;echov1
+      value: github.com/FACorreiaa/smart-finance-tracker/gen/go/echo/v1;echov1
       path: echo/v1
   disable:
     - module: buf.build/bufbuild/protovalidate

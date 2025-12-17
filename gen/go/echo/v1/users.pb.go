@@ -434,9 +434,9 @@ const file_echo_v1_users_proto_rawDesc = "" +
 	"\vUserService\x12<\n" +
 	"\aGetUser\x12\x17.echo.v1.GetUserRequest\x1a\x18.echo.v1.GetUserResponse\x12E\n" +
 	"\n" +
-	"UpdateUser\x12\x1a.echo.v1.UpdateUserRequest\x1a\x1b.echo.v1.UpdateUserResponseBt\n" +
+	"UpdateUser\x12\x1a.echo.v1.UpdateUserRequest\x1a\x1b.echo.v1.UpdateUserResponseB\x9b\x01\n" +
 	"\vcom.echo.v1B\n" +
-	"UsersProtoP\x01Z\x1aechoapi/gen/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
+	"UsersProtoP\x01ZAgithub.com/FACorreiaa/smart-finance-tracker/gen/go/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
 
 var (
 	file_echo_v1_users_proto_rawDescOnce sync.Once

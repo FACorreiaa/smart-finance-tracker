@@ -1531,8 +1531,8 @@ const file_echo_v1_imports_proto_rawDesc = "" +
 	"\fGetImportJob\x12\x1c.echo.v1.GetImportJobRequest\x1a\x1d.echo.v1.GetImportJobResponse\x12Q\n" +
 	"\x0eListImportJobs\x12\x1e.echo.v1.ListImportJobsRequest\x1a\x1f.echo.v1.ListImportJobsResponse\x12H\n" +
 	"\vGetDocument\x12\x1b.echo.v1.GetDocumentRequest\x1a\x1c.echo.v1.GetDocumentResponse\x12N\n" +
-	"\rListDocuments\x12\x1d.echo.v1.ListDocumentsRequest\x1a\x1e.echo.v1.ListDocumentsResponseBv\n" +
-	"\vcom.echo.v1B\fImportsProtoP\x01Z\x1aechoapi/gen/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
+	"\rListDocuments\x12\x1d.echo.v1.ListDocumentsRequest\x1a\x1e.echo.v1.ListDocumentsResponseB\x9d\x01\n" +
+	"\vcom.echo.v1B\fImportsProtoP\x01ZAgithub.com/FACorreiaa/smart-finance-tracker/gen/go/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
 
 var (
 	file_echo_v1_imports_proto_rawDescOnce sync.Once

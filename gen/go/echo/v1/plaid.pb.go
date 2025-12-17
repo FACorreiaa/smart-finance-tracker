@@ -949,9 +949,9 @@ const file_echo_v1_plaid_proto_rawDesc = "" +
 	"\x0fCreateLinkToken\x12\x1f.echo.v1.CreateLinkTokenRequest\x1a .echo.v1.CreateLinkTokenResponse\x12`\n" +
 	"\x13ExchangePublicToken\x12#.echo.v1.ExchangePublicTokenRequest\x1a$.echo.v1.ExchangePublicTokenResponse\x12W\n" +
 	"\x10SyncTransactions\x12 .echo.v1.SyncTransactionsRequest\x1a!.echo.v1.SyncTransactionsResponse\x12Q\n" +
-	"\x0eListPlaidItems\x12\x1e.echo.v1.ListPlaidItemsRequest\x1a\x1f.echo.v1.ListPlaidItemsResponseBt\n" +
+	"\x0eListPlaidItems\x12\x1e.echo.v1.ListPlaidItemsRequest\x1a\x1f.echo.v1.ListPlaidItemsResponseB\x9b\x01\n" +
 	"\vcom.echo.v1B\n" +
-	"PlaidProtoP\x01Z\x1aechoapi/gen/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
+	"PlaidProtoP\x01ZAgithub.com/FACorreiaa/smart-finance-tracker/gen/go/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
 
 var (
 	file_echo_v1_plaid_proto_rawDescOnce sync.Once

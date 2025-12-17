@@ -2082,8 +2082,8 @@ const file_echo_v1_finance_proto_rawDesc = "" +
 	"\n" +
 	"CreateGoal\x12\x1a.echo.v1.CreateGoalRequest\x1a\x1b.echo.v1.CreateGoalResponse\x12B\n" +
 	"\tListGoals\x12\x19.echo.v1.ListGoalsRequest\x1a\x1a.echo.v1.ListGoalsResponse\x12u\n" +
-	"\x1aListRecurringSubscriptions\x12*.echo.v1.ListRecurringSubscriptionsRequest\x1a+.echo.v1.ListRecurringSubscriptionsResponseBv\n" +
-	"\vcom.echo.v1B\fFinanceProtoP\x01Z\x1aechoapi/gen/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
+	"\x1aListRecurringSubscriptions\x12*.echo.v1.ListRecurringSubscriptionsRequest\x1a+.echo.v1.ListRecurringSubscriptionsResponseB\x9d\x01\n" +
+	"\vcom.echo.v1B\fFinanceProtoP\x01ZAgithub.com/FACorreiaa/smart-finance-tracker/gen/go/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
 
 var (
 	file_echo_v1_finance_proto_rawDescOnce sync.Once

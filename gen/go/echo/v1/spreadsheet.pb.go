@@ -837,8 +837,8 @@ const file_echo_v1_spreadsheet_proto_rawDesc = "" +
 	"\rListTemplates\x12\x1d.echo.v1.ListTemplatesRequest\x1a\x1e.echo.v1.ListTemplatesResponse\x12N\n" +
 	"\rCreateMapping\x12\x1d.echo.v1.CreateMappingRequest\x1a\x1e.echo.v1.CreateMappingResponse\x12K\n" +
 	"\fListMappings\x12\x1c.echo.v1.ListMappingsRequest\x1a\x1d.echo.v1.ListMappingsResponse\x12W\n" +
-	"\x10EvaluateTemplate\x12 .echo.v1.EvaluateTemplateRequest\x1a!.echo.v1.EvaluateTemplateResponseBz\n" +
-	"\vcom.echo.v1B\x10SpreadsheetProtoP\x01Z\x1aechoapi/gen/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
+	"\x10EvaluateTemplate\x12 .echo.v1.EvaluateTemplateRequest\x1a!.echo.v1.EvaluateTemplateResponseB\xa1\x01\n" +
+	"\vcom.echo.v1B\x10SpreadsheetProtoP\x01ZAgithub.com/FACorreiaa/smart-finance-tracker/gen/go/echo/v1;echov1\xa2\x02\x03EXX\xaa\x02\aEcho.V1\xca\x02\bEcho_\\V1\xe2\x02\x14Echo_\\V1\\GPBMetadata\xea\x02\bEcho::V1b\x06proto3"
 
 var (
 	file_echo_v1_spreadsheet_proto_rawDescOnce sync.Once
