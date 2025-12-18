@@ -126,7 +126,6 @@ func (d *Dependencies) initServices() error {
 
 	// Needs imports and struct fields.
 	// Since replace_file_content is single block, I will use multi_replace for this file.
-
 }
 
 // initHandlers initializes all handler dependencies

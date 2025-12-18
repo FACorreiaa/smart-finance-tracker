@@ -9,4 +9,3 @@ var (
 	ErrForbidden       = errors.New("action forbidden")
 	ErrBadRequest      = errors.New("bad request")
 )
-

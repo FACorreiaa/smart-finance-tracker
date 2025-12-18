@@ -112,5 +112,5 @@ type Claims struct {
 	SubscriptionPlan     string `json:"pln,omitempty"`   // Custom claim for Subscription Plan (e.g., 'free', 'premium').
 	SubscriptionStatus   string `json:"sts,omitempty"`   // Custom claim for Subscription Status (e.g., 'active', 'trialing').
 	Scope                string `json:"scope,omitempty"` // Optional scope information.
-	jwt.RegisteredClaims                                 // Embed standard claims (ExpiresAt, IssuedAt, Subject, etc.).
+	jwt.RegisteredClaims        // Embed standard claims (ExpiresAt, IssuedAt, Subject, etc.).
 }

@@ -15,4 +15,3 @@ type Interest struct {
 	UpdatedAt   *time.Time `json:"updated_at"`
 	Source      string     `json:"source"`
 }
-

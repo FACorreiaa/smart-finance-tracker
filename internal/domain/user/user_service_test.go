@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	// For potentially testing UpdateLastLogin with time
-	"github.com/google/uuid"
 	locitypes "github.com/FACorreiaa/smart-finance-tracker/internal/domain/common"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

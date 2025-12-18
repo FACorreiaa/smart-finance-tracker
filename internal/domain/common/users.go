@@ -70,4 +70,3 @@ type User struct {
 	Firstname    string    `db:"firstname" json:"firstname"`
 	Lastname     string    `db:"lastname" json:"lastname"`
 }
-

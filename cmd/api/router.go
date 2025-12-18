@@ -55,7 +55,7 @@ func SetupRouter(deps *Dependencies) http.Handler {
 	requestIDInterceptor := interceptors.NewRequestIDInterceptor("X-Request-ID")
 	tracingInterceptor := interceptors.NewTracingInterceptor(tracer)
 	validationInterceptor := validate.NewInterceptor()
-	//subscriptionInterceptor := subscription.NewRateLimitInterceptor(deps.SubscriptionService)
+	// subscriptionInterceptor := subscription.NewRateLimitInterceptor(deps.SubscriptionService)
 
 	// Setup interceptor chain
 	interceptorChain := connect.WithInterceptors(
@@ -63,7 +63,7 @@ func SetupRouter(deps *Dependencies) http.Handler {
 		tracingInterceptor,
 		validationInterceptor,
 		rateLimiter,
-		//subscriptionInterceptor,
+		// subscriptionInterceptor,
 		interceptors.NewRecoveryInterceptor(deps.Logger),
 		interceptors.NewLoggingInterceptor(deps.Logger),
 		interceptors.NewAuthInterceptor(jwtSecret, publicProcedures...),
@@ -126,7 +126,7 @@ func registerConnectRoutes(mux *http.ServeMux, deps *Dependencies, opts connect.
 		deps.AuthHandler,
 		opts,
 	)
-	mux.Handle(authServicePath, authServiceHandler)
+	mux.Handle(authServicePath, wrapAuthRoute(authServiceHandler))
 	deps.Logger.Info("registered Connect RPC service", "path", authServicePath)
 
 	if deps.UserHandler != nil {
@@ -136,6 +136,22 @@ func registerConnectRoutes(mux *http.ServeMux, deps *Dependencies, opts connect.
 	}
 
 	deps.Logger.Info("Connect RPC routes configured")
+}
+
+func wrapAuthRoute(next http.Handler) http.Handler {
+	const maxBodyBytes int64 = 1 << 20 // 1 MiB
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+
+		if r.Body != nil {
+			r.Body = http.MaxBytesReader(w, r.Body, maxBodyBytes)
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 // registerUtilityRoutes registers health check, metrics, and other utility routes
