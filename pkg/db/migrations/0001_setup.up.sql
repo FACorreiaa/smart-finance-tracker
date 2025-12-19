@@ -56,7 +56,7 @@ DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'poi_source') THEN
         CREATE TYPE poi_source AS ENUM (
-            'loci_ai', -- Added by our system/AI
+            'echo_ai', -- Added by our system/AI
             'openstreetmap', -- Imported from OSM
             'user_submitted',-- Submitted by a user (maybe requires verification)
             'partner'        -- From a paying partner/featured listing

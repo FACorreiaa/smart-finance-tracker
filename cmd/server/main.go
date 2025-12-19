@@ -36,7 +36,7 @@ func main() {
 		Level: slog.LevelInfo,
 	}))
 
-	logger.Info("starting loci API")
+	logger.Info("starting echo API")
 
 	// Load configuration
 	cfg, err := config.Load()

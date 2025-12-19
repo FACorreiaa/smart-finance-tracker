@@ -19,7 +19,7 @@ type TracingInterceptor struct {
 // NewTracingInterceptor creates a tracing interceptor.
 func NewTracingInterceptor(tracer trace.Tracer) *TracingInterceptor {
 	if tracer == nil {
-		tracer = otel.Tracer("loci/interceptors")
+		tracer = otel.Tracer("echo/interceptors")
 	}
 	return &TracingInterceptor{tracer: tracer}
 }

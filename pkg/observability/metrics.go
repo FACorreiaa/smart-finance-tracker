@@ -13,7 +13,7 @@ var (
 	// RequestsTotal tracks total number of RPC requests
 	RequestsTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "loci_rpc_requests_total",
+			Name: "echo_rpc_requests_total",
 			Help: "Total number of RPC requests",
 		},
 		[]string{"procedure", "code"},
@@ -22,7 +22,7 @@ var (
 	// RequestDuration tracks request duration
 	RequestDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "loci_rpc_duration_seconds",
+			Name:    "echo_rpc_duration_seconds",
 			Help:    "RPC request duration in seconds",
 			Buckets: prometheus.DefBuckets,
 		},
@@ -32,7 +32,7 @@ var (
 	// ActiveRequests tracks currently active requests
 	ActiveRequests = promauto.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Name: "loci_rpc_active_requests",
+			Name: "echo_rpc_active_requests",
 			Help: "Number of active RPC requests",
 		},
 		[]string{"procedure"},

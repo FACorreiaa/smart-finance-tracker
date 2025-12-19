@@ -9,7 +9,7 @@ import (
 	"os"
 	"testing"
 
-	locitypes "github.com/FACorreiaa/smart-finance-tracker/internal/domain/common"
+	echotypes "github.com/FACorreiaa/smart-finance-tracker/internal/domain/common"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
@@ -75,7 +75,7 @@ func clearUsersTable(t *testing.T) {
 }
 
 // Helper to create a user directly for testing setup
-func createTestUserDirectly(t *testing.T, user locitypes.User) uuid.UUID {
+func createTestUserDirectly(t *testing.T, user echotypes.User) uuid.UUID {
 	t.Helper()
 	// This function would use testUserRepo or direct db exec to insert a user for setup
 	// It depends on whether your UserRepo has a CreateUser method.
@@ -97,7 +97,7 @@ func TestServiceUserImpl_UserProfile_Integration(t *testing.T) {
 	ctx := context.Background()
 	clearUsersTable(t) // Ensure a clean state
 
-	testUser := locitypes.User{ // Assuming locitypes.User is the struct for your DB table
+	testUser := echotypes.User{ // Assuming echotypes.User is the struct for your DB table
 		Username:     "integ_test_user",
 		Email:        "integ@example.com",
 		PasswordHash: "hashedpassword", // In real tests, you'd hash a test password
@@ -136,7 +136,7 @@ func TestServiceUserImpl_UserProfile_Integration(t *testing.T) {
 		country := "Testlandia"
 		city := "IntegCity"
 
-		updateParams := locitypes.UpdateProfileParams{
+		updateParams := echotypes.UpdateProfileParams{
 			Username:    &newUsername,
 			Firstname:   &newFirstname,
 			Lastname:    &newLastname,
@@ -169,7 +169,7 @@ func TestServiceUserImpl_UserStatus_Integration(t *testing.T) {
 	ctx := context.Background()
 	clearUsersTable(t)
 
-	testUser := locitypes.User{Username: "status_user", Email: "status@example.com", PasswordHash: "hash"}
+	testUser := echotypes.User{Username: "status_user", Email: "status@example.com", PasswordHash: "hash"}
 	userID := createTestUserDirectly(t, testUser)
 
 	t.Run("Update Last Login", func(t *testing.T) {

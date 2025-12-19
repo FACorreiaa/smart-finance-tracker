@@ -34,10 +34,10 @@ lint: ## Run linters
 
 # Docker commands
 docker-build: ## Build Docker image
-	docker build -t loci-api:latest .
+	docker build -t echo-api:latest .
 
 docker-run: ## Run Docker container
-	docker run -p 8080:8080 --env-file .env loci-api:latest
+	docker run -p 8080:8080 --env-file .env echo-api:latest
 
 # Docker Compose commands
 docker-compose-up: ## Start all services with docker-compose

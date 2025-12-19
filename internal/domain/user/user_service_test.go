@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	// For potentially testing UpdateLastLogin with time
-	locitypes "github.com/FACorreiaa/smart-finance-tracker/internal/domain/common"
+	echotypes "github.com/FACorreiaa/smart-finance-tracker/internal/domain/common"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -26,15 +26,15 @@ type MockUserRepo struct {
 	mock.Mock
 }
 
-func (m *MockUserRepo) GetUserByID(ctx context.Context, userID uuid.UUID) (*locitypes.UserProfile, error) {
+func (m *MockUserRepo) GetUserByID(ctx context.Context, userID uuid.UUID) (*echotypes.UserProfile, error) {
 	args := m.Called(ctx, userID)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*locitypes.UserProfile), args.Error(1)
+	return args.Get(0).(*echotypes.UserProfile), args.Error(1)
 }
 
-func (m *MockUserRepo) UpdateProfile(ctx context.Context, userID uuid.UUID, params locitypes.UpdateProfileParams) error {
+func (m *MockUserRepo) UpdateProfile(ctx context.Context, userID uuid.UUID, params echotypes.UpdateProfileParams) error {
 	args := m.Called(ctx, userID, params)
 	return args.Error(0)
 }
@@ -81,7 +81,7 @@ func TestServiceUserImpl_GetUserProfile(t *testing.T) {
 
 	username := "testuser"
 	t.Run("success", func(t *testing.T) {
-		expectedProfile := &locitypes.UserProfile{
+		expectedProfile := &echotypes.UserProfile{
 			ID:       userID,
 			Username: &username,
 			Email:    "test@example.com",
@@ -97,7 +97,7 @@ func TestServiceUserImpl_GetUserProfile(t *testing.T) {
 	t.Run("repository error - not found", func(t *testing.T) {
 		// Assuming your repo returns a specific error for not found, or pgx.ErrNoRows
 		// For this mock, we just return a generic error that the service wraps.
-		repoErr := errors.New("user not found in repo") // Or a specific locitypes.ErrNotFound
+		repoErr := errors.New("user not found in repo") // Or a specific echotypes.ErrNotFound
 		mockRepo.On("GetUserByID", ctx, userID).Return(nil, repoErr).Once()
 
 		_, err := service.GetUserProfile(ctx, userID)
@@ -130,7 +130,7 @@ func TestServiceUserImpl_UpdateUserProfile(t *testing.T) {
 	newLastName := "NewLast"
 	newCountry := "Testland"
 	newCity := "Testville"
-	params := locitypes.UpdateProfileParams{
+	params := echotypes.UpdateProfileParams{
 		Username:  &newUsername,  // Assuming Username is a *string in UpdateProfileParams
 		Firstname: &newFirstName, // Assuming Firstname is a *string in UpdateProfileParams
 		Lastname:  &newLastName,  // Assuming Lastname is a *string in UpdateProfileParams

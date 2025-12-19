@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
-	auth "github.com/FACorreiaa/loci-connect-proto/gen/go/loci/auth"
+	echov1 "github.com/FACorreiaa/smart-finance-tracker-proto/gen/go/echo/v1"
 
 	"github.com/FACorreiaa/smart-finance-tracker/internal/domain/auth/repository"
 	"github.com/FACorreiaa/smart-finance-tracker/internal/domain/auth/service"
@@ -30,9 +30,10 @@ func TestAuthHandler_Register_Success(t *testing.T) {
 		}, nil
 	}
 
-	req := connect.NewRequest(&auth.RegisterRequest{
+	username := "rpcuser"
+	req := connect.NewRequest(&echov1.RegisterRequest{
 		Email:    "rpc-register@example.com",
-		Username: "rpcuser",
+		Username: &username,
 		Password: "Str0ng!Pass",
 	})
 	req.Header().Set("User-Agent", "rpc-test-agent")
@@ -41,8 +42,8 @@ func TestAuthHandler_Register_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Register: %v", err)
 	}
-	if resp.Msg == nil || !resp.Msg.Success {
-		t.Fatalf("expected success response, got %#v", resp.Msg)
+	if resp.Msg == nil || resp.Msg.User == nil {
+		t.Fatalf("expected user in response, got %#v", resp.Msg)
 	}
 
 	if _, err := repo.GetUserByEmail(ctx, "rpc-register@example.com"); err != nil {
@@ -65,7 +66,7 @@ func TestAuthHandler_Register_Success(t *testing.T) {
 func TestAuthHandler_Register_InvalidInput(t *testing.T) {
 	handler := NewAuthHandler(nil)
 
-	_, err := handler.Register(context.Background(), connect.NewRequest(&auth.RegisterRequest{}))
+	_, err := handler.Register(context.Background(), connect.NewRequest(&echov1.RegisterRequest{}))
 	if err == nil {
 		t.Fatalf("expected validation error")
 	}
@@ -89,7 +90,7 @@ func TestAuthHandler_Login_Success(t *testing.T) {
 		}, nil
 	}
 
-	req := connect.NewRequest(&auth.LoginRequest{
+	req := connect.NewRequest(&echov1.LoginRequest{
 		Email:    user.Email,
 		Password: "Str0ng!Pass",
 	})
@@ -99,7 +100,7 @@ func TestAuthHandler_Login_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Login: %v", err)
 	}
-	if resp.Msg.AccessToken != "login-access" || resp.Msg.RefreshToken != "login-refresh" {
+	if resp.Msg.Tokens == nil || resp.Msg.Tokens.AccessToken != "login-access" || resp.Msg.Tokens.RefreshToken != "login-refresh" {
 		t.Fatalf("unexpected tokens: %#v", resp.Msg)
 	}
 	if len(repo.Sessions) != 1 {
@@ -115,7 +116,7 @@ func TestAuthHandler_Login_InvalidCredentials(t *testing.T) {
 	hashed := servicetest.MustHash(t, "Str0ng!Pass")
 	servicetest.AddUser(repo, t, "badlogin@example.com", true, hashed)
 
-	_, err := handler.Login(ctx, connect.NewRequest(&auth.LoginRequest{
+	_, err := handler.Login(ctx, connect.NewRequest(&echov1.LoginRequest{
 		Email:    "badlogin@example.com",
 		Password: "WrongPass!1",
 	}))
@@ -127,7 +128,7 @@ func TestAuthHandler_Login_InvalidCredentials(t *testing.T) {
 	}
 }
 
-func TestAuthHandler_RefreshToken_Success(t *testing.T) {
+func TestAuthHandler_Refresh_Success(t *testing.T) {
 	ctx := context.Background()
 	svc, repo, tokens, _ := servicetest.NewTestAuthService()
 	handler := NewAuthHandler(svc)
@@ -158,14 +159,14 @@ func TestAuthHandler_RefreshToken_Success(t *testing.T) {
 		}, nil
 	}
 
-	resp, err := handler.RefreshToken(ctx, connect.NewRequest(&auth.RefreshTokenRequest{
+	resp, err := handler.Refresh(ctx, connect.NewRequest(&echov1.RefreshRequest{
 		RefreshToken: oldRefresh,
 	}))
 	if err != nil {
-		t.Fatalf("RefreshToken: %v", err)
+		t.Fatalf("Refresh: %v", err)
 	}
-	if resp.Msg.RefreshToken != "new-refresh" {
-		t.Fatalf("unexpected refresh token %s", resp.Msg.RefreshToken)
+	if resp.Msg.Tokens == nil || resp.Msg.Tokens.RefreshToken != "new-refresh" {
+		t.Fatalf("unexpected refresh token %v", resp.Msg)
 	}
 	if len(repo.Sessions) != 1 {
 		t.Fatalf("expected one session after refresh, got %d", len(repo.Sessions))
@@ -178,38 +179,37 @@ func TestAuthHandler_RefreshToken_Success(t *testing.T) {
 	}
 }
 
-func TestAuthHandler_ValidateSession(t *testing.T) {
+func TestAuthHandler_GetMe(t *testing.T) {
 	ctx := context.Background()
-	svc, _, tokens, _ := servicetest.NewTestAuthService()
+	svc, _, _, _ := servicetest.NewTestAuthService()
 	handler := NewAuthHandler(svc)
 
-	tokens.AccessFunc = func(token string) (*service.Claims, error) {
-		if token != "access-token" {
-			return nil, errors.New("bad token")
-		}
-		return &service.Claims{
-			UserID:   "user-id",
-			Username: "rpcuser",
-			Email:    "rpc@example.com",
-		}, nil
-	}
+	// Add user details to context (simulating auth interceptor)
+	ctx = context.WithValue(ctx, "user_id", "user-id")
+	ctx = context.WithValue(ctx, "email", "rpc@example.com")
+	ctx = context.WithValue(ctx, "username", "rpcuser")
 
-	resp, err := handler.ValidateSession(ctx, connect.NewRequest(&auth.ValidateSessionRequest{
-		SessionId: "access-token",
-	}))
+	resp, err := handler.GetMe(ctx, connect.NewRequest(&echov1.GetMeRequest{}))
 	if err != nil {
-		t.Fatalf("ValidateSession: %v", err)
+		t.Fatalf("GetMe: %v", err)
 	}
-	if !resp.Msg.Valid || resp.Msg.Email == nil || *resp.Msg.Email != "rpc@example.com" {
+	if resp.Msg.User == nil || resp.Msg.User.Email != "rpc@example.com" {
 		t.Fatalf("unexpected response %#v", resp.Msg)
 	}
+}
 
-	resp, err = handler.ValidateSession(ctx, connect.NewRequest(&auth.ValidateSessionRequest{}))
-	if err != nil {
-		t.Fatalf("ValidateSession empty should not error: %v", err)
+func TestAuthHandler_GetMe_Unauthenticated(t *testing.T) {
+	ctx := context.Background()
+	svc, _, _, _ := servicetest.NewTestAuthService()
+	handler := NewAuthHandler(svc)
+
+	// No user in context
+	_, err := handler.GetMe(ctx, connect.NewRequest(&echov1.GetMeRequest{}))
+	if err == nil {
+		t.Fatalf("expected error for unauthenticated request")
 	}
-	if resp.Msg.Valid {
-		t.Fatalf("expected invalid for empty session id")
+	if connect.CodeOf(err) != connect.CodeUnauthenticated {
+		t.Fatalf("expected unauthenticated, got %v", connect.CodeOf(err))
 	}
 }
 
@@ -225,13 +225,13 @@ func TestAuthHandler_Logout(t *testing.T) {
 		ExpiresAt: time.Now().Add(time.Hour),
 	}
 
-	resp, err := handler.Logout(ctx, connect.NewRequest(&auth.LogoutRequest{
+	resp, err := handler.Logout(ctx, connect.NewRequest(&echov1.LogoutRequest{
 		RefreshToken: "refresh-token",
 	}))
 	if err != nil {
 		t.Fatalf("Logout: %v", err)
 	}
-	if resp.Msg == nil || !resp.Msg.Success {
+	if resp.Msg == nil {
 		t.Fatalf("unexpected response %#v", resp.Msg)
 	}
 	if len(repo.Sessions) != 0 {
@@ -246,7 +246,7 @@ func TestAuthHandler_ErrorMappings(t *testing.T) {
 
 	// Inactive account triggers permission denied.
 	user := servicetest.AddUser(repo, t, "inactive@example.com", false, servicetest.MustHash(t, "Str0ng!Pass"))
-	req := connect.NewRequest(&auth.LoginRequest{
+	req := connect.NewRequest(&echov1.LoginRequest{
 		Email:    user.Email,
 		Password: "Str0ng!Pass",
 	})
@@ -256,7 +256,7 @@ func TestAuthHandler_ErrorMappings(t *testing.T) {
 	}
 
 	// Unknown email maps to not found.
-	_, err = handler.Login(ctx, connect.NewRequest(&auth.LoginRequest{
+	_, err = handler.Login(ctx, connect.NewRequest(&echov1.LoginRequest{
 		Email:    "missing@example.com",
 		Password: "Str0ng!Pass",
 	}))

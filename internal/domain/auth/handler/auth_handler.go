@@ -5,18 +5,17 @@ import (
 	"errors"
 
 	"connectrpc.com/connect"
-	auth "github.com/FACorreiaa/loci-connect-proto/gen/go/loci/auth"
-	authconnect "github.com/FACorreiaa/loci-connect-proto/gen/go/loci/auth/authconnect"
-	commonpb "github.com/FACorreiaa/loci-connect-proto/gen/go/loci/common"
+	echov1 "github.com/FACorreiaa/smart-finance-tracker-proto/gen/go/echo/v1"
+	"github.com/FACorreiaa/smart-finance-tracker-proto/gen/go/echo/v1/echov1connect"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/FACorreiaa/smart-finance-tracker/internal/domain/auth/common"
-	"github.com/FACorreiaa/smart-finance-tracker/internal/domain/auth/presenter"
 	"github.com/FACorreiaa/smart-finance-tracker/internal/domain/auth/service"
 )
 
 // AuthHandler implements the AuthService Connect handlers.
 type AuthHandler struct {
-	authconnect.UnimplementedAuthServiceHandler
+	echov1connect.UnimplementedAuthServiceHandler
 	service *service.AuthService
 }
 
@@ -30,29 +29,37 @@ func NewAuthHandler(svc *service.AuthService) *AuthHandler {
 // Register handles user registration RPCs.
 func (h *AuthHandler) Register(
 	ctx context.Context,
-	req *connect.Request[auth.RegisterRequest],
-) (*connect.Response[commonpb.Response], error) {
-	if req.Msg.Email == "" || string(req.Msg.Password) == "" || req.Msg.Username == "" {
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("email, username, and password are required"))
+	req *connect.Request[echov1.RegisterRequest],
+) (*connect.Response[echov1.AuthResponse], error) {
+	if req.Msg.Email == "" || req.Msg.Password == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("email and password are required"))
+	}
+
+	username := ""
+	if req.Msg.Username != nil {
+		username = *req.Msg.Username
 	}
 
 	result, err := h.service.RegisterUser(ctx, service.RegisterParams{
 		Email:       req.Msg.Email,
-		Username:    req.Msg.Username,
-		Password:    string(req.Msg.Password),
-		DisplayName: req.Msg.Username,
+		Username:    username,
+		Password:    req.Msg.Password,
+		DisplayName: username,
 		Metadata:    metadataFromRequest(req),
 	})
 	if err != nil {
 		return nil, h.toConnectError(err)
 	}
 
-	return connect.NewResponse(presenter.RegisterResponse(result)), nil
+	return connect.NewResponse(toAuthResponse(result)), nil
 }
 
 // Login authenticates a user.
-func (h *AuthHandler) Login(ctx context.Context, req *connect.Request[auth.LoginRequest]) (*connect.Response[auth.LoginResponse], error) {
-	if req.Msg.Email == "" || string(req.Msg.Password) == "" {
+func (h *AuthHandler) Login(
+	ctx context.Context,
+	req *connect.Request[echov1.LoginRequest],
+) (*connect.Response[echov1.AuthResponse], error) {
+	if req.Msg.Email == "" || req.Msg.Password == "" {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("email and password are required"))
 	}
 
@@ -65,11 +72,17 @@ func (h *AuthHandler) Login(ctx context.Context, req *connect.Request[auth.Login
 		return nil, h.toConnectError(err)
 	}
 
-	return connect.NewResponse(presenter.LoginResponse(result)), nil
+	return connect.NewResponse(toAuthResponse(&service.RegisterResult{
+		User:   result.User,
+		Tokens: result.Tokens,
+	})), nil
 }
 
-// RefreshToken issues new access/refresh tokens.
-func (h *AuthHandler) RefreshToken(ctx context.Context, req *connect.Request[auth.RefreshTokenRequest]) (*connect.Response[auth.TokenResponse], error) {
+// Refresh issues new access/refresh tokens.
+func (h *AuthHandler) Refresh(
+	ctx context.Context,
+	req *connect.Request[echov1.RefreshRequest],
+) (*connect.Response[echov1.AuthResponse], error) {
 	if req.Msg.RefreshToken == "" {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("refresh token is required"))
 	}
@@ -82,78 +95,19 @@ func (h *AuthHandler) RefreshToken(ctx context.Context, req *connect.Request[aut
 		return nil, h.toConnectError(err)
 	}
 
-	return connect.NewResponse(presenter.RefreshTokenResponse(tokens)), nil
-}
-
-// ValidateSession validates a session (treated as an access token here).
-func (h *AuthHandler) ValidateSession(ctx context.Context, req *connect.Request[auth.ValidateSessionRequest]) (*connect.Response[auth.ValidateSessionResponse], error) {
-	if req.Msg.SessionId == "" {
-		return connect.NewResponse(&auth.ValidateSessionResponse{Valid: false}), nil
-	}
-
-	claims, err := h.service.ValidateAccessToken(ctx, req.Msg.SessionId)
-	if err != nil {
-		return connect.NewResponse(&auth.ValidateSessionResponse{Valid: false}), nil
-	}
-
-	return connect.NewResponse(presenter.ValidateSessionResponse(claims)), nil
-}
-
-// ChangePassword is not yet implemented.
-func (h *AuthHandler) ChangePassword(_ context.Context, _ *connect.Request[auth.ChangePasswordRequest]) (*connect.Response[commonpb.Response], error) {
-	return nil, connect.NewError(
-		connect.CodeUnimplemented,
-		errors.New("change password is not implemented"),
-	)
-}
-
-// ChangeEmail is not yet implemented.
-func (h *AuthHandler) ChangeEmail(_ context.Context, _ *connect.Request[auth.ChangeEmailRequest]) (*connect.Response[commonpb.Response], error) {
-	return nil, connect.NewError(
-		connect.CodeUnimplemented,
-		errors.New("change email is not implemented"),
-	)
-}
-
-// ForgotPassword initiates the password reset flow.
-func (h *AuthHandler) ForgotPassword(ctx context.Context, req *connect.Request[auth.ForgotPasswordRequest]) (*connect.Response[commonpb.Response], error) {
-	if req.Msg.Email == "" {
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("email is required"))
-	}
-
-	// Always return success to prevent email enumeration attacks
-	// The service will silently fail if the email doesn't exist
-	if err := h.service.RequestPasswordReset(ctx, req.Msg.Email); err != nil {
-		// Log error but don't expose to client
-		// h.logger.Error("password reset request failed", "error", err)
-	}
-
-	msg := "If an account exists with this email, you will receive a password reset link"
-	return connect.NewResponse(&commonpb.Response{
-		Success: true,
-		Message: &msg,
-	}), nil
-}
-
-// ResetPassword completes the password reset with a valid token.
-func (h *AuthHandler) ResetPassword(ctx context.Context, req *connect.Request[auth.ResetPasswordRequest]) (*connect.Response[commonpb.Response], error) {
-	if req.Msg.Token == "" || req.Msg.NewPassword == "" {
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("token and new password are required"))
-	}
-
-	if err := h.service.ResetPassword(ctx, req.Msg.Token, req.Msg.NewPassword); err != nil {
-		return nil, h.toConnectError(err)
-	}
-
-	msg := "Password reset successfully"
-	return connect.NewResponse(&commonpb.Response{
-		Success: true,
-		Message: &msg,
+	return connect.NewResponse(&echov1.AuthResponse{
+		Tokens: &echov1.AuthTokens{
+			AccessToken:  tokens.AccessToken,
+			RefreshToken: tokens.RefreshToken,
+		},
 	}), nil
 }
 
 // Logout deletes the refresh token session.
-func (h *AuthHandler) Logout(ctx context.Context, req *connect.Request[auth.LogoutRequest]) (*connect.Response[commonpb.Response], error) {
+func (h *AuthHandler) Logout(
+	ctx context.Context,
+	req *connect.Request[echov1.LogoutRequest],
+) (*connect.Response[echov1.LogoutResponse], error) {
 	if req.Msg.RefreshToken == "" {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("refresh token is required"))
 	}
@@ -162,11 +116,69 @@ func (h *AuthHandler) Logout(ctx context.Context, req *connect.Request[auth.Logo
 		return nil, h.toConnectError(err)
 	}
 
-	msg := "Logged out successfully"
-	return connect.NewResponse(&commonpb.Response{
-		Success: true,
-		Message: &msg,
+	return connect.NewResponse(&echov1.LogoutResponse{}), nil
+}
+
+// GetMe returns the current authenticated user's information.
+func (h *AuthHandler) GetMe(
+	ctx context.Context,
+	_ *connect.Request[echov1.GetMeRequest],
+) (*connect.Response[echov1.GetMeResponse], error) {
+	// User ID comes from auth interceptor context
+	userIDStr, ok := getContextValue(ctx, "user_id")
+	if !ok || userIDStr == "" {
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("authentication required"))
+	}
+
+	email, _ := getContextValue(ctx, "email")
+	username, _ := getContextValue(ctx, "username")
+
+	return connect.NewResponse(&echov1.GetMeResponse{
+		User: &echov1.User{
+			Id:       userIDStr,
+			Email:    email,
+			Username: username,
+		},
 	}), nil
+}
+
+// getContextValue extracts a string value from context.
+func getContextValue(ctx context.Context, key string) (string, bool) {
+	val := ctx.Value(key)
+	if val == nil {
+		return "", false
+	}
+	str, ok := val.(string)
+	return str, ok
+}
+
+// toAuthResponse converts service results to proto AuthResponse.
+func toAuthResponse(result *service.RegisterResult) *echov1.AuthResponse {
+	if result == nil {
+		return &echov1.AuthResponse{}
+	}
+
+	resp := &echov1.AuthResponse{}
+
+	if result.User != nil {
+		resp.User = &echov1.User{
+			Id:          result.User.ID.String(),
+			Email:       result.User.Email,
+			Username:    result.User.Username,
+			DisplayName: result.User.DisplayName,
+			CreatedAt:   timestamppb.New(result.User.CreatedAt),
+			UpdatedAt:   timestamppb.New(result.User.UpdatedAt),
+		}
+	}
+
+	if result.Tokens != nil {
+		resp.Tokens = &echov1.AuthTokens{
+			AccessToken:  result.Tokens.AccessToken,
+			RefreshToken: result.Tokens.RefreshToken,
+		}
+	}
+
+	return resp
 }
 
 func metadataFromRequest[T any](req *connect.Request[T]) service.SessionMetadata {

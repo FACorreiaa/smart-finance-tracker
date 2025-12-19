@@ -8,9 +8,6 @@ import (
 
 	"connectrpc.com/connect"
 	c "connectrpc.com/cors"
-	"github.com/FACorreiaa/loci-connect-proto/gen/go/loci/auth/authconnect"
-	"github.com/FACorreiaa/loci-connect-proto/gen/go/loci/user/userconnect"
-
 	"connectrpc.com/validate"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -18,6 +15,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"golang.org/x/time/rate"
 
+	"github.com/FACorreiaa/smart-finance-tracker-proto/gen/go/echo/v1/echov1connect"
 	"github.com/FACorreiaa/smart-finance-tracker/pkg/interceptors"
 	"github.com/FACorreiaa/smart-finance-tracker/pkg/observability"
 )
@@ -32,16 +30,13 @@ func SetupRouter(deps *Dependencies) http.Handler {
 	}
 
 	publicProcedures := []string{
-		authconnect.AuthServiceRegisterProcedure,
-		authconnect.AuthServiceLoginProcedure,
-		authconnect.AuthServiceRefreshTokenProcedure,
-		authconnect.AuthServiceValidateSessionProcedure,
-		authconnect.AuthServiceForgotPasswordProcedure,
-		authconnect.AuthServiceResetPasswordProcedure,
-		// Public statistics endpoint
+		echov1connect.AuthServiceRegisterProcedure,
+		echov1connect.AuthServiceLoginProcedure,
+		echov1connect.AuthServiceRefreshProcedure,
+		// Note: Logout and GetMe require authentication
 	}
 
-	tracer := otel.GetTracerProvider().Tracer("loci/api")
+	tracer := otel.GetTracerProvider().Tracer("echo/api")
 
 	var rateLimiter connect.Interceptor
 	if deps.Config.Server.RateLimitPerSecond > 0 && deps.Config.Server.RateLimitBurst > 0 {
@@ -122,7 +117,7 @@ func SetupRouter(deps *Dependencies) http.Handler {
 
 // registerConnectRoutes registers all Connect RPC service service
 func registerConnectRoutes(mux *http.ServeMux, deps *Dependencies, opts connect.HandlerOption) {
-	authServicePath, authServiceHandler := authconnect.NewAuthServiceHandler(
+	authServicePath, authServiceHandler := echov1connect.NewAuthServiceHandler(
 		deps.AuthHandler,
 		opts,
 	)
@@ -130,7 +125,7 @@ func registerConnectRoutes(mux *http.ServeMux, deps *Dependencies, opts connect.
 	deps.Logger.Info("registered Connect RPC service", "path", authServicePath)
 
 	if deps.UserHandler != nil {
-		userPath, userHandler := userconnect.NewUserServiceHandler(deps.UserHandler, opts)
+		userPath, userHandler := echov1connect.NewUserServiceHandler(deps.UserHandler, opts)
 		mux.Handle(userPath, userHandler)
 		deps.Logger.Info("registered Connect RPC service", "path", userPath)
 	}

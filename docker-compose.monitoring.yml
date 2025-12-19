@@ -17,14 +17,14 @@ services:
     volumes:
       - .:/app
     depends_on:
-      - postgres-loci
+      - postgres-echo
       - otel-collector
     networks:
       - monitoring
 
-  postgres-loci:
+  postgres-echo:
     platform: linux/amd64
-    container_name: postgres-loci
+    container_name: postgres-echo
     build:
       context: .
       dockerfile: postgres.Dockerfile
@@ -40,7 +40,7 @@ services:
       # Be careful exposing DB ports directly
       - "5454:5432" # Map host 5454 -> container 5432
     volumes:
-      - postgres-loci-data:/var/lib/postgresql/data
+      - postgres-echo-data:/var/lib/postgresql/data
       - ./scripts/postgres/init:/docker-entrypoint-initdb.d # Your extensions script
     restart: unless-stopped
     networks:
@@ -202,7 +202,7 @@ services:
       - monitoring
 
 volumes:
-  postgres-loci-data:
+  postgres-echo-data:
   prometheus_data:
   grafana_data:
   tempo_data:

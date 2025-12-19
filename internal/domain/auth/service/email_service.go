@@ -38,7 +38,7 @@ func NewEmailService() EmailSender {
 
 // SendVerificationEmail sends an email verification link
 func (s *smtpEmailService) SendVerificationEmail(toEmail, toName, token string) error {
-	subject := "Verify Your Email - loci"
+	subject := "Verify Your Email - echo"
 	verificationLink := fmt.Sprintf("%s/verify-email?token=%s", s.frontendURL, token)
 
 	body := fmt.Sprintf(`
@@ -50,9 +50,9 @@ func (s *smtpEmailService) SendVerificationEmail(toEmail, toName, token string) 
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background-color: #f8f9fa; border-radius: 10px; padding: 30px;">
-        <h1 style="color: #4a5568; margin-bottom: 20px;">Welcome to loci!</h1>
+        <h1 style="color: #4a5568; margin-bottom: 20px;">Welcome to echo!</h1>
         <p>Hi %s,</p>
-        <p>Thank you for registering with loci. Please verify your email address by clicking the button below:</p>
+        <p>Thank you for registering with echo. Please verify your email address by clicking the button below:</p>
         <div style="text-align: center; margin: 30px 0;">
             <a href="%s" style="background-color: #4f46e5; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Verify Email</a>
         </div>
@@ -70,7 +70,7 @@ func (s *smtpEmailService) SendVerificationEmail(toEmail, toName, token string) 
 
 // SendPasswordResetEmail sends a password reset link
 func (s *smtpEmailService) SendPasswordResetEmail(toEmail, toName, token string) error {
-	subject := "Reset Your Password - loci"
+	subject := "Reset Your Password - echo"
 	resetLink := fmt.Sprintf("%s/reset-password?token=%s", s.frontendURL, token)
 
 	body := fmt.Sprintf(`
@@ -102,7 +102,7 @@ func (s *smtpEmailService) SendPasswordResetEmail(toEmail, toName, token string)
 
 // SendWelcomeEmail sends a welcome email after successful registration
 func (s *smtpEmailService) SendWelcomeEmail(toEmail, toName string) error {
-	subject := "Welcome to loci!"
+	subject := "Welcome to echo!"
 
 	body := fmt.Sprintf(`
 <!DOCTYPE html>
@@ -113,7 +113,7 @@ func (s *smtpEmailService) SendWelcomeEmail(toEmail, toName string) error {
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background-color: #f8f9fa; border-radius: 10px; padding: 30px;">
-        <h1 style="color: #4a5568; margin-bottom: 20px;">🎉 Welcome to loci!</h1>
+        <h1 style="color: #4a5568; margin-bottom: 20px;">🎉 Welcome to echo!</h1>
         <p>Hi %s,</p>
         <p>Your email has been verified successfully! You can now:</p>
         <ul style="margin: 20px 0;">
@@ -126,7 +126,7 @@ func (s *smtpEmailService) SendWelcomeEmail(toEmail, toName string) error {
             <a href="%s/dashboard" style="background-color: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Get Started</a>
         </div>
         <p style="margin-top: 30px;">Happy learning!</p>
-        <p>The loci Team</p>
+        <p>The echo Team</p>
     </div>
 </body>
 </html>
