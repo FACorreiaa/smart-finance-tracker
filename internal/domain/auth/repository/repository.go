@@ -11,9 +11,9 @@ type User struct {
 	ID              uuid.UUID  `db:"id"`
 	Email           string     `db:"email"`
 	Username        string     `db:"username"`
-	HashedPassword  string     `db:"hashed_password"`
+	HashedPassword  string     `db:"password_hash"`
 	DisplayName     string     `db:"display_name"`
-	AvatarURL       *string    `db:"avatar_url"`
+	AvatarURL       *string    `db:"profile_image_url"`
 	Role            string     `db:"role"`
 	IsActive        bool       `db:"is_active"`
 	EmailVerifiedAt *time.Time `db:"email_verified_at"`

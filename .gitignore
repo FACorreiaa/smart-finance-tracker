@@ -33,3 +33,4 @@ go.work.sum
 docs/pilars.png
 .cache
 main
+internal/data/import

@@ -1,0 +1,48 @@
+# Build artifacts
+bin/
+main
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test files
+*.test
+coverage.out
+*.prof
+
+# IDE/Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Local development
+internal/data/import/
+.cache/
+tmp/
+
+# Build and CI
+Dockerfile
+docker-compose*.yml
+Makefile
+.github/
+
+# Misc
+.DS_Store
+Thumbs.db

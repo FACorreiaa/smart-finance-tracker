@@ -58,7 +58,7 @@ func (r *PostgresAuthRepository) CreateUser(ctx context.Context, email, username
 	}
 
 	query := `
-		INSERT INTO users (id, email, username, hashed_password, display_name, role, is_active, created_at, updated_at)
+		INSERT INTO users (id, email, username, password_hash, display_name, role, is_active, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		RETURNING id, created_at, updated_at
 	`
@@ -87,7 +87,7 @@ func (r *PostgresAuthRepository) CreateUser(ctx context.Context, email, username
 // GetUserByEmail retrieves a user by email
 func (r *PostgresAuthRepository) GetUserByEmail(ctx context.Context, email string) (*User, error) {
 	query := `
-		SELECT id, email, username, hashed_password, display_name, avatar_url, role,
+		SELECT id, email, username, password_hash, display_name, profile_image_url, role,
 		       is_active, email_verified_at, created_at, updated_at, last_login_at
 		FROM users
 		WHERE email = $1
@@ -112,7 +112,7 @@ func (r *PostgresAuthRepository) GetUserByEmail(ctx context.Context, email strin
 // GetUserByID retrieves a user by ID
 func (r *PostgresAuthRepository) GetUserByID(ctx context.Context, userID uuid.UUID) (*User, error) {
 	query := `
-		SELECT id, email, username, hashed_password, display_name, avatar_url, role,
+		SELECT id, email, username, password_hash, display_name, profile_image_url, role,
 		       is_active, email_verified_at, created_at, updated_at, last_login_at
 		FROM users
 		WHERE id = $1
@@ -268,7 +268,7 @@ func (r *PostgresAuthRepository) VerifyEmail(ctx context.Context, userID uuid.UU
 
 // UpdatePassword updates a user's password
 func (r *PostgresAuthRepository) UpdatePassword(ctx context.Context, userID uuid.UUID, hashedPassword string) error {
-	query := `UPDATE users SET hashed_password = $1, updated_at = $2 WHERE id = $3`
+	query := `UPDATE users SET password_hash = $1, updated_at = $2 WHERE id = $3`
 	_, err := r.pgpool.Exec(ctx, query, hashedPassword, time.Now(), userID)
 	return err
 }
@@ -293,7 +293,7 @@ func (r *PostgresAuthRepository) CreateOrUpdateOAuthIdentity(ctx context.Context
 // GetUserByOAuthIdentity retrieves a user by OAuth provider identity
 func (r *PostgresAuthRepository) GetUserByOAuthIdentity(ctx context.Context, providerName, providerUserID string) (*User, error) {
 	query := `
-		SELECT u.id, u.email, u.username, u.hashed_password, u.display_name, u.avatar_url, u.role,
+		SELECT u.id, u.email, u.username, u.password_hash, u.display_name, u.profile_image_url, u.role,
 		       u.is_active, u.email_verified_at, u.created_at, u.updated_at, u.last_login_at
 		FROM users u
 		INNER JOIN user_oauth_identities o ON u.id = o.user_id
@@ -319,7 +319,7 @@ func (r *PostgresAuthRepository) GetUserByOAuthIdentity(ctx context.Context, pro
 // GetUserByPhone retrieves a user by phone number
 func (r *PostgresAuthRepository) GetUserByPhone(ctx context.Context, phone string) (*User, error) {
 	query := `
-		SELECT id, email, username, hashed_password, display_name, avatar_url, role,
+		SELECT id, email, username, password_hash, display_name, profile_image_url, role,
 		       is_active, email_verified_at, created_at, updated_at, last_login_at
 		FROM users
 		WHERE phone = $1

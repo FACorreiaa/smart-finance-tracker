@@ -51,7 +51,7 @@ func TestPostgresAuthRepository_GetUserByEmail_NotFound(t *testing.T) {
 	defer mock.Close()
 
 	rows := pgxmock.NewRows([]string{
-		"id", "email", "username", "hashed_password", "display_name", "avatar_url", "role",
+		"id", "email", "username", "password_hash", "display_name", "profile_image_url", "role",
 		"is_active", "email_verified_at", "created_at", "updated_at", "last_login_at",
 	})
 	mock.ExpectQuery(regexp.QuoteMeta(getUserByEmailQuery)).
@@ -176,7 +176,7 @@ func TestPostgresAuthRepository_GetUserByOAuthIdentity_NotFound(t *testing.T) {
 	defer mock.Close()
 
 	rows := pgxmock.NewRows([]string{
-		"id", "email", "username", "hashed_password", "display_name", "avatar_url", "role",
+		"id", "email", "username", "password_hash", "display_name", "profile_image_url", "role",
 		"is_active", "email_verified_at", "created_at", "updated_at", "last_login_at",
 	})
 	mock.ExpectQuery(regexp.QuoteMeta(getUserByOAuthQuery)).
@@ -198,12 +198,12 @@ func TestPostgresAuthRepository_GetUserByOAuthIdentity_NotFound(t *testing.T) {
 
 var (
 	createUserQuery = `
-		INSERT INTO users (id, email, username, hashed_password, display_name, role, is_active, created_at, updated_at)
+		INSERT INTO users (id, email, username, password_hash, display_name, role, is_active, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		RETURNING id, created_at, updated_at
 	`
 	getUserByEmailQuery = `
-		SELECT id, email, username, hashed_password, display_name, avatar_url, role,
+		SELECT id, email, username, password_hash, display_name, profile_image_url, role,
 		       is_active, email_verified_at, created_at, updated_at, last_login_at
 		FROM users
 		WHERE email = $1
@@ -225,7 +225,7 @@ var (
 		RETURNING id, created_at
 	`
 	getUserByOAuthQuery = `
-		SELECT u.id, u.email, u.username, u.hashed_password, u.display_name, u.avatar_url, u.role,
+		SELECT u.id, u.email, u.username, u.password_hash, u.display_name, u.profile_image_url, u.role,
 		       u.is_active, u.email_verified_at, u.created_at, u.updated_at, u.last_login_at
 		FROM users u
 		INNER JOIN user_oauth_identities o ON u.id = o.user_id

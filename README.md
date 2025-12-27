@@ -40,8 +40,8 @@ Design constraints (intentional):
 
 Focus: make something people *want to come back to* and *share*.
 
-- **Auth + sessions:** account creation, login, refresh, logout.
-- **Data ingestion v1:** CSV upload/import (bank exports) to avoid early aggregator complexity.
+[x]- **Auth + sessions:** account creation, login, refresh, logout.
+[x]- **Data ingestion v1:** CSV upload/import (bank exports) to avoid early aggregator complexity.
 - **Document import v1:** import CSV/XLSX (and later invoices) into a canonical transaction model.
 - **Transaction normalization:** merchant cleanup + categorization with user overrides.
 - **Spending overview:** top categories, merchants, trends, month-to-date vs last month.
