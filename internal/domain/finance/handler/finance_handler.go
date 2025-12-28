@@ -111,6 +111,12 @@ func (h *FinanceHandler) protoMappingToService(protoMapping *echov1.CsvMapping, 
 	// Determine if double entry based on whether debit/credit columns are set
 	isDoubleEntry := debitCol >= 0 && creditCol >= 0
 
+	// Parse delimiter from proto (single character string to rune)
+	var delimiter rune
+	if protoMapping.Delimiter != "" {
+		delimiter = rune(protoMapping.Delimiter[0])
+	}
+
 	return importservice.ColumnMapping{
 		DateCol:          dateCol,
 		DescCol:          descCol,
@@ -121,6 +127,8 @@ func (h *FinanceHandler) protoMappingToService(protoMapping *echov1.CsvMapping, 
 		IsDoubleEntry:    isDoubleEntry,
 		IsEuropeanFormat: getIsEuropeanFormat(protoMapping),
 		DateFormat:       dateFormat,
+		Delimiter:        delimiter,
+		SkipLines:        int(protoMapping.SkipLines),
 	}
 }
 

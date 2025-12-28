@@ -35,6 +35,8 @@ type ColumnMapping struct {
 	IsEuropeanFormat bool // True for European number format (1.234,56)
 	DateFormat       string
 	Location         *time.Location
+	Delimiter        rune // Detected delimiter from AnalyzeCsvFile
+	SkipLines        int  // Number of lines to skip before header
 }
 
 // AnalyzeResult contains the result of analyzing an uploaded file
@@ -182,7 +184,16 @@ func (s *ImportService) ImportWithOptions(ctx context.Context, userID uuid.UUID,
 	normalizedData := normalizeCSVBytes(fileData)
 
 	detectOpts := &sniffer.DetectOptions{HeaderRowIndex: -1}
-	if opts.HeaderRows > 0 {
+
+	// Use delimiter from mapping if provided (from AnalyzeCsvFile)
+	if mapping.Delimiter != 0 {
+		detectOpts.Delimiter = mapping.Delimiter
+	}
+
+	// Use skip lines from mapping if provided, otherwise use opts.HeaderRows
+	if mapping.SkipLines > 0 {
+		detectOpts.HeaderRowIndex = mapping.SkipLines
+	} else if opts.HeaderRows > 0 {
 		detectOpts.HeaderRowIndex = opts.HeaderRows - 1
 	}
 
