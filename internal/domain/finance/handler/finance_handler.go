@@ -12,6 +12,7 @@ import (
 	"buf.build/gen/go/echo-tracker/echo/connectrpc/go/echo/v1/echov1connect"
 	echov1 "buf.build/gen/go/echo-tracker/echo/protocolbuffers/go/echo/v1"
 	importservice "github.com/FACorreiaa/smart-finance-tracker/internal/domain/import/service"
+	"github.com/FACorreiaa/smart-finance-tracker/pkg/interceptors"
 )
 
 // FinanceHandler implements the FinanceService Connect handlers.
@@ -33,7 +34,7 @@ func (h *FinanceHandler) ImportTransactionsCsv(
 	req *connect.Request[echov1.ImportTransactionsCsvRequest],
 ) (*connect.Response[echov1.ImportTransactionsCsvResponse], error) {
 	// Get user ID from auth context
-	userIDStr, ok := getContextValue(ctx, "user_id")
+	userIDStr, ok := interceptors.GetUserIDFromContext(ctx)
 	if !ok || userIDStr == "" {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("authentication required"))
 	}
@@ -124,14 +125,4 @@ func parseColumnIndex(col string) int {
 		return -1
 	}
 	return idx
-}
-
-// getContextValue extracts a string value from context.
-func getContextValue(ctx context.Context, key string) (string, bool) {
-	val := ctx.Value(key)
-	if val == nil {
-		return "", false
-	}
-	str, ok := val.(string)
-	return str, ok
 }

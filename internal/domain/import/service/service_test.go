@@ -337,9 +337,9 @@ type progressSnapshot struct {
 }
 
 type fakeImportRepo struct {
-	mu            sync.Mutex
-	bulkInserts   []int
-	progressCalls []progressSnapshot
+	mu                sync.Mutex
+	bulkInserts       []int
+	progressSnapshots []progressSnapshot
 }
 
 func (f *fakeImportRepo) GetMappingByFingerprint(ctx context.Context, fingerprint string, userID *uuid.UUID) (*repository.BankMapping, error) {
@@ -383,7 +383,7 @@ func (f *fakeImportRepo) GetImportJobByID(ctx context.Context, id uuid.UUID) (*r
 func (f *fakeImportRepo) UpdateImportJobProgress(ctx context.Context, id uuid.UUID, rowsImported, rowsFailed int) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	f.progressCalls = append(f.progressCalls, progressSnapshot{
+	f.progressSnapshots = append(f.progressSnapshots, progressSnapshot{
 		rowsImported: rowsImported,
 		rowsFailed:   rowsFailed,
 	})
@@ -416,7 +416,7 @@ func (f *fakeImportRepo) bulkSizes() []int {
 func (f *fakeImportRepo) progressCalls() []progressSnapshot {
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	calls := make([]progressSnapshot, len(f.progressCalls))
-	copy(calls, f.progressCalls)
+	calls := make([]progressSnapshot, len(f.progressSnapshots))
+	copy(calls, f.progressSnapshots)
 	return calls
 }
