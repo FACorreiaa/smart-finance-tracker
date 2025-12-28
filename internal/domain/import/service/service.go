@@ -8,6 +8,9 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"runtime"
+	"sort"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -57,6 +60,22 @@ type ImportResult struct {
 type ImportService struct {
 	repo   repository.ImportRepository
 	logger *slog.Logger
+}
+
+const (
+	importBatchSize           = 500
+	importProgressUpdateEvery = 500
+)
+
+type parseJob struct {
+	lineNum int
+	record  []string
+}
+
+type parseResult struct {
+	lineNum int
+	tx      *repository.ParsedTransaction
+	err     error
 }
 
 // NewImportService creates a new import service
@@ -140,9 +159,6 @@ func (s *ImportService) ImportWithMapping(ctx context.Context, userID uuid.UUID,
 		return nil, fmt.Errorf("failed to detect file config: %w", err)
 	}
 
-	// Parse the file
-	transactions, parseErrors := s.parseTransactions(fileData, config, mapping)
-
 	// Create a file record
 	fileRecord := &repository.UserFile{
 		UserID:    userID,
@@ -162,35 +178,114 @@ func (s *ImportService) ImportWithMapping(ctx context.Context, userID uuid.UUID,
 		Kind:      "transactions",
 		Status:    "running",
 		AccountID: accountID,
-		RowsTotal: len(transactions) + len(parseErrors),
+		RowsTotal: 0,
 	}
 	if err := s.repo.CreateImportJob(ctx, job); err != nil {
 		return nil, fmt.Errorf("failed to create import job: %w", err)
 	}
 
-	// Bulk insert transactions
-	imported, err := s.repo.BulkInsertTransactions(ctx, userID, accountID, transactions)
-	if err != nil {
-		errMsg := err.Error()
-		s.repo.FinishImportJob(ctx, job.ID, "failed", 0, len(transactions), &errMsg)
-		return nil, fmt.Errorf("failed to insert transactions: %w", err)
+	parseCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	results, preErrors := s.parseTransactionsStream(parseCtx, fileData, config, mapping)
+
+	errors := make([]string, 0, len(preErrors))
+	errors = append(errors, preErrors...)
+	rowsFailed := len(preErrors)
+	rowsImported := 0
+
+	type parseError struct {
+		lineNum int
+		err     error
+	}
+
+	var parseErrors []parseError
+	batch := make([]*repository.ParsedTransaction, 0, importBatchSize)
+	progressSinceUpdate := rowsFailed
+
+	updateProgress := func() {
+		if err := s.repo.UpdateImportJobProgress(ctx, job.ID, rowsImported, rowsFailed); err != nil {
+			s.logger.Warn("failed to update import job progress", "error", err)
+		}
+	}
+
+	flushBatch := func() error {
+		if len(batch) == 0 {
+			return nil
+		}
+		imported, err := s.repo.BulkInsertTransactions(ctx, userID, accountID, batch)
+		if err != nil {
+			return err
+		}
+		rowsImported += imported
+		batch = batch[:0]
+		updateProgress()
+		progressSinceUpdate = 0
+		return nil
+	}
+
+	var insertErr error
+	for result := range results {
+		if insertErr != nil {
+			continue
+		}
+		if result.err != nil {
+			parseErrors = append(parseErrors, parseError{lineNum: result.lineNum, err: result.err})
+			rowsFailed++
+			progressSinceUpdate++
+			if progressSinceUpdate >= importProgressUpdateEvery {
+				updateProgress()
+				progressSinceUpdate = 0
+			}
+			continue
+		}
+
+		batch = append(batch, result.tx)
+		if len(batch) >= importBatchSize {
+			if err := flushBatch(); err != nil {
+				insertErr = err
+				cancel()
+			}
+		}
+	}
+
+	if insertErr == nil {
+		if err := flushBatch(); err != nil {
+			insertErr = err
+		}
+	}
+
+	if progressSinceUpdate > 0 && insertErr == nil {
+		updateProgress()
+	}
+
+	if len(parseErrors) > 0 {
+		sort.Slice(parseErrors, func(i, j int) bool {
+			return parseErrors[i].lineNum < parseErrors[j].lineNum
+		})
+		for _, parseErr := range parseErrors {
+			errors = append(errors, fmt.Sprintf("line %d: %v", parseErr.lineNum, parseErr.err))
+		}
+	}
+
+	if insertErr != nil {
+		errMsg := insertErr.Error()
+		s.repo.FinishImportJob(ctx, job.ID, "failed", rowsImported, rowsFailed, &errMsg)
+		return nil, fmt.Errorf("failed to insert transactions: %w", insertErr)
 	}
 
 	// Mark job as complete
 	status := "succeeded"
-	if len(parseErrors) > 0 {
-		status = "succeeded" // Still succeeded, just with some parse errors
-	}
-	if err := s.repo.FinishImportJob(ctx, job.ID, status, imported, len(parseErrors), nil); err != nil {
+	if err := s.repo.FinishImportJob(ctx, job.ID, status, rowsImported, rowsFailed, nil); err != nil {
 		s.logger.Warn("failed to finish import job", "error", err)
 	}
 
 	return &ImportResult{
 		JobID:        job.ID,
-		RowsTotal:    len(transactions) + len(parseErrors),
-		RowsImported: imported,
-		RowsFailed:   len(parseErrors),
-		Errors:       parseErrors,
+		RowsTotal:    rowsImported + rowsFailed,
+		RowsImported: rowsImported,
+		RowsFailed:   rowsFailed,
+		Errors:       errors,
 	}, nil
 }
 
@@ -201,51 +296,89 @@ func (s *ImportService) ImportWithExistingMapping(ctx context.Context, userID uu
 	return nil, fmt.Errorf("import with existing mapping not yet implemented")
 }
 
-// parseTransactions extracts transactions from a CSV file
-func (s *ImportService) parseTransactions(fileData []byte, config *sniffer.FileConfig, mapping ColumnMapping) ([]*repository.ParsedTransaction, []string) {
-	var transactions []*repository.ParsedTransaction
-	var errors []string
+// parseTransactionsStream streams parsed rows from a CSV file.
+func (s *ImportService) parseTransactionsStream(ctx context.Context, fileData []byte, config *sniffer.FileConfig, mapping ColumnMapping) (<-chan parseResult, []string) {
+	results := make(chan parseResult, 1)
 
 	reader := csv.NewReader(bytes.NewReader(fileData))
 	reader.Comma = config.Delimiter
 	reader.LazyQuotes = true
 	reader.FieldsPerRecord = -1
 
-	// Skip metadata lines + header
+	var errors []string
 	for i := 0; i <= config.SkipLines; i++ {
 		_, err := reader.Read()
 		if err == io.EOF {
-			return nil, []string{"file has no data rows"}
+			close(results)
+			return results, []string{"file has no data rows"}
 		}
 		if err != nil {
 			errors = append(errors, fmt.Sprintf("error reading line %d: %v", i, err))
 		}
 	}
 
-	lineNum := config.SkipLines + 2 // 1-indexed, after header
-	for {
-		record, err := reader.Read()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			errors = append(errors, fmt.Sprintf("line %d: %v", lineNum, err))
-			lineNum++
-			continue
-		}
-
-		tx, err := s.parseRow(record, mapping, lineNum)
-		if err != nil {
-			errors = append(errors, fmt.Sprintf("line %d: %v", lineNum, err))
-			lineNum++
-			continue
-		}
-
-		transactions = append(transactions, tx)
-		lineNum++
+	workerCount := runtime.GOMAXPROCS(0)
+	if workerCount < 1 {
+		workerCount = 1
 	}
 
-	return transactions, errors
+	results = make(chan parseResult, workerCount*4)
+	jobs := make(chan parseJob, workerCount*4)
+
+	var wg sync.WaitGroup
+	for i := 0; i < workerCount; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for job := range jobs {
+				if ctx.Err() != nil {
+					return
+				}
+				tx, err := s.parseRow(job.record, mapping, job.lineNum)
+				select {
+				case results <- parseResult{lineNum: job.lineNum, tx: tx, err: err}:
+				case <-ctx.Done():
+					return
+				}
+			}
+		}()
+	}
+
+	go func() {
+		defer close(jobs)
+		lineNum := config.SkipLines + 2 // 1-indexed, after header
+		for {
+			if ctx.Err() != nil {
+				return
+			}
+			record, err := reader.Read()
+			if err == io.EOF {
+				return
+			}
+			if err != nil {
+				select {
+				case results <- parseResult{lineNum: lineNum, err: err}:
+				case <-ctx.Done():
+					return
+				}
+				lineNum++
+				continue
+			}
+			select {
+			case jobs <- parseJob{lineNum: lineNum, record: record}:
+			case <-ctx.Done():
+				return
+			}
+			lineNum++
+		}
+	}()
+
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	return results, errors
 }
 
 // parseRow converts a CSV row into a ParsedTransaction

@@ -11,7 +11,6 @@ import (
 	"github.com/FACorreiaa/smart-finance-tracker/internal/domain/auth/handler"
 	"github.com/FACorreiaa/smart-finance-tracker/internal/domain/auth/repository"
 	"github.com/FACorreiaa/smart-finance-tracker/internal/domain/auth/service"
-
 	financehandler "github.com/FACorreiaa/smart-finance-tracker/internal/domain/finance/handler"
 	importrepo "github.com/FACorreiaa/smart-finance-tracker/internal/domain/import/repository"
 	importservice "github.com/FACorreiaa/smart-finance-tracker/internal/domain/import/service"

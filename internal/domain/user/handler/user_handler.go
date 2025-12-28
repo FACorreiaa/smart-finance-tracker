@@ -5,13 +5,13 @@ import (
 	"errors"
 	"fmt"
 
-	"buf.build/gen/go/echo-tracker/echo/connectrpc/go/echo/v1/echov1connect"
-	echov1 "buf.build/gen/go/echo-tracker/echo/protocolbuffers/go/echo/v1"
 	"connectrpc.com/connect"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/google/uuid"
 
+	"buf.build/gen/go/echo-tracker/echo/connectrpc/go/echo/v1/echov1connect"
+	echov1 "buf.build/gen/go/echo-tracker/echo/protocolbuffers/go/echo/v1"
 	echotypes "github.com/FACorreiaa/smart-finance-tracker/internal/domain/common"
 	"github.com/FACorreiaa/smart-finance-tracker/internal/domain/user"
 	"github.com/FACorreiaa/smart-finance-tracker/pkg/interceptors"

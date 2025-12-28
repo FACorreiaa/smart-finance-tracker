@@ -17,6 +17,9 @@ run: ## Run the application
 test: ## Run tests
 	go test -v -race -coverprofile=coverage.out ./...
 
+bench:
+	go test ./... -bench . 
+
 test-coverage: test ## Run tests with coverage report
 	go tool cover -html=coverage.out
 

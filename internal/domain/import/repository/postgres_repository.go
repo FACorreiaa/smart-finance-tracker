@@ -257,7 +257,7 @@ func (r *PostgresImportRepository) FinishImportJob(ctx context.Context, id uuid.
 	query := `
 		UPDATE import_jobs SET
 			status = $2, rows_imported = $3, rows_failed = $4,
-			error_message = $5, finished_at = NOW()
+			error_message = $5, finished_at = NOW(), rows_total = $3 + $4
 		WHERE id = $1
 	`
 	_, err := r.pool.Exec(ctx, query, id, status, rowsImported, rowsFailed, errorMessage)

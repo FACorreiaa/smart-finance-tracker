@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"buf.build/gen/go/echo-tracker/echo/connectrpc/go/echo/v1/echov1connect"
 	"connectrpc.com/connect"
 	c "connectrpc.com/cors"
 	"connectrpc.com/validate"
@@ -15,7 +16,6 @@ import (
 	"go.opentelemetry.io/otel"
 	"golang.org/x/time/rate"
 
-	"buf.build/gen/go/echo-tracker/echo/connectrpc/go/echo/v1/echov1connect"
 	"github.com/FACorreiaa/smart-finance-tracker/pkg/interceptors"
 	"github.com/FACorreiaa/smart-finance-tracker/pkg/observability"
 )
@@ -128,12 +128,12 @@ func registerConnectRoutes(mux *http.ServeMux, deps *Dependencies, opts connect.
 		userPath, userHandler := echov1connect.NewUserServiceHandler(deps.UserHandler, opts)
 		mux.Handle(userPath, userHandler)
 		deps.Logger.Info("registered Connect RPC service", "path", userPath)
-	}
 
-	if deps.FinanceHandler != nil {
-		financePath, financeHandler := echov1connect.NewFinanceServiceHandler(deps.FinanceHandler, opts)
-		mux.Handle(financePath, financeHandler)
-		deps.Logger.Info("registered Connect RPC service", "path", financePath)
+		if deps.FinanceHandler != nil {
+			financePath, financeHandler := echov1connect.NewFinanceServiceHandler(deps.FinanceHandler, opts)
+			mux.Handle(financePath, financeHandler)
+			deps.Logger.Info("registered Connect RPC service", "path", financePath)
+		}
 	}
 
 	deps.Logger.Info("Connect RPC routes configured")
