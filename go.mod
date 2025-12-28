@@ -25,10 +25,7 @@ require (
 	google.golang.org/protobuf v1.36.11
 )
 
-require (
-	buf.build/gen/go/echo-tracker/echo/connectrpc/go v1.19.1-20251227203949-4a4a34167426.2
-	github.com/FACorreiaa/smart-finance-tracker-proto v0.0.0-00010101000000-000000000000
-)
+require buf.build/gen/go/echo-tracker/echo/connectrpc/go v1.19.1-20251227203949-4a4a34167426.2
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.11-20251209175733-2a1774d88802.1 // indirect
@@ -79,5 +76,3 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251222181119-0a764e51fe1b // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/FACorreiaa/smart-finance-tracker-proto => ../Echo-proto
