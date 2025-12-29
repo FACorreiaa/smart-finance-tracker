@@ -405,11 +405,19 @@ func (f *fakeImportRepo) FinishImportJob(ctx context.Context, id uuid.UUID, stat
 	return nil
 }
 
-func (f *fakeImportRepo) BulkInsertTransactions(ctx context.Context, userID uuid.UUID, accountID *uuid.UUID, currencyCode string, txs []*repository.ParsedTransaction) (int, error) {
+func (f *fakeImportRepo) BulkInsertTransactions(ctx context.Context, userID uuid.UUID, accountID *uuid.UUID, currencyCode string, importJobID uuid.UUID, institutionName string, txs []*repository.ParsedTransaction) (int, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.bulkInserts = append(f.bulkInserts, len(txs))
 	return len(txs), nil
+}
+
+func (f *fakeImportRepo) ListTransactions(ctx context.Context, userID uuid.UUID, filter repository.ListTransactionsFilter) ([]*repository.Transaction, int64, error) {
+	return nil, 0, nil
+}
+
+func (f *fakeImportRepo) DeleteByImportJobID(ctx context.Context, userID uuid.UUID, importJobID uuid.UUID) (int, error) {
+	return 0, nil
 }
 
 func (f *fakeImportRepo) bulkSizes() []int {

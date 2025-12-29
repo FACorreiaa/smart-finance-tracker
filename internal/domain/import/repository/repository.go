@@ -92,5 +92,44 @@ type ImportRepository interface {
 	FinishImportJob(ctx context.Context, id uuid.UUID, status string, rowsImported, rowsFailed int, errorMessage *string) error
 
 	// Transactions (bulk insert for imported data)
-	BulkInsertTransactions(ctx context.Context, userID uuid.UUID, accountID *uuid.UUID, currencyCode string, txs []*ParsedTransaction) (int, error)
+	BulkInsertTransactions(ctx context.Context, userID uuid.UUID, accountID *uuid.UUID, currencyCode string, importJobID uuid.UUID, institutionName string, txs []*ParsedTransaction) (int, error)
+
+	// Transactions (list/query)
+	ListTransactions(ctx context.Context, userID uuid.UUID, filter ListTransactionsFilter) ([]*Transaction, int64, error)
+
+	// Transactions (delete by import job)
+	DeleteByImportJobID(ctx context.Context, userID uuid.UUID, importJobID uuid.UUID) (int, error)
+}
+
+// Transaction represents a stored transaction with full metadata
+type Transaction struct {
+	ID                  uuid.UUID  `db:"id"`
+	UserID              uuid.UUID  `db:"user_id"`
+	AccountID           *uuid.UUID `db:"account_id"`
+	CategoryID          *uuid.UUID `db:"category_id"`
+	CategoryName        *string    `db:"category_name"` // Joined from categories table
+	Date                time.Time  `db:"date"`
+	Description         string     `db:"description"`
+	MerchantName        *string    `db:"merchant_name"`
+	OriginalDescription *string    `db:"original_description"`
+	AmountCents         int64      `db:"amount_cents"`
+	CurrencyCode        string     `db:"currency_code"`
+	Source              string     `db:"source"`
+	ExternalID          *string    `db:"external_id"`
+	Notes               *string    `db:"notes"`
+	InstitutionName     *string    `db:"institution_name"`
+	CreatedAt           time.Time  `db:"created_at"`
+	UpdatedAt           time.Time  `db:"updated_at"`
+}
+
+// ListTransactionsFilter specifies filter/pagination options for listing transactions
+type ListTransactionsFilter struct {
+	AccountID   *uuid.UUID
+	CategoryID  *uuid.UUID
+	ImportJobID *uuid.UUID // Filter by import batch (for staging view)
+	StartDate   *time.Time
+	EndDate     *time.Time
+	Search      string // Search in description
+	Limit       int
+	Offset      int
 }

@@ -52,6 +52,10 @@ Focus: make something people *want to come back to* and *share*.
 - **Mini-wrapped:** shareable monthly summary cards (no sensitive details by default).
 - **BYOS v1:** upload a spreadsheet template + field mapping; export computed views as shareable/read-only.
 - **Payments (optional in MVP):** Stripe Checkout for premium plan (behind feature flags).
+- **XLSX Import:** Extend the import service to handle Excel files
+- **Category Assignment:** Auto-categorize transactions or let users assign categories, add more metadata to transactions
+- **Monthly Insights:** Aggregated spending by category/month
+- **Empty State Dashboard:** Prompt new users to import
 
 ## Post‑MVP (Moat: Operating System + Trust)
 

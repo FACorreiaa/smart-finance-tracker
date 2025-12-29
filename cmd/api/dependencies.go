@@ -139,7 +139,7 @@ func (d *Dependencies) initServices() error {
 // initHandlers initializes all handler dependencies
 func (d *Dependencies) initHandlers() error {
 	d.AuthHandler = handler.NewAuthHandler(d.AuthService)
-	d.FinanceHandler = financehandler.NewFinanceHandler(d.ImportService)
+	d.FinanceHandler = financehandler.NewFinanceHandler(d.ImportService, d.ImportRepo)
 	d.ImportHandler = importhandler.NewImportHandler(d.ImportService, d.Logger)
 
 	d.Logger.Info("handlers initialized")

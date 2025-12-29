@@ -1,0 +1,161 @@
+Title,Description,Priority,Labels
+AUTH-001: Wire user profile endpoints and align user schema,"Problem: `UserRepo` queries columns not present in `users`, and `UserRepo`/`UserHandler` are not initialized.
+Subtasks:
+- [ ] Init `UserRepo` in `cmd/api/dependencies.go` and register `UserHandler` in `cmd/api/router.go`.
+- [ ] Align profile fields with schema (update `internal/domain/user/user_repository.go` and `internal/domain/common/users.go`, or add columns in `pkg/db/migrations/0002_create_users.up.sql`).
+- [ ] Add/update tests for profile read/write (`internal/domain/user/user_service_test.go`, `internal/domain/user/user_integration_test.go`).
+Acceptance: GetUser/UpdateUser RPCs return without SQL errors and match the schema.",High,"MVP, Auth, TechDebt"
+AUTH-002: Expose verification + password reset flows,"Problem: verification and password reset flows exist in `AuthService` but no RPCs expose them.
+Subtasks:
+- [ ] Update auth proto definitions and regenerate Connect code (module referenced by `buf.yaml`, outputs under `vendor/buf.build/.../auth*.go`).
+- [ ] Implement handler methods in `internal/domain/auth/handler/auth_handler.go`.
+- [ ] Add handler/service tests (`internal/domain/auth/handler/auth_handler_test.go`, `internal/domain/auth/service/auth_service_test.go`).
+Acceptance: RPCs validate inputs and update `user_tokens`/`user_sessions` as expected.",High,"MVP, Auth"
+AUTH-003: Consolidate session/token revocation,"Problem: auth uses `user_sessions` while user repo revokes `refresh_tokens`/`sessions`.
+Subtasks:
+- [ ] Standardize on `user_sessions`/`user_tokens` and update `internal/domain/user/user_repository.go` revocation paths.
+- [ ] Remove or deprecate legacy tables/usage in `pkg/db/migrations/0002_create_users.up.sql`.
+- [ ] Add tests covering revoke on password change and deactivate.
+Acceptance: all revocation uses a single session system.",High,"MVP, Auth, TechDebt"
+AUTH-004: Update auth email templates to Echo branding,"Problem: templates reference unrelated product features.
+Subtasks:
+- [ ] Rewrite templates in `internal/domain/auth/service/email_service.go`.
+- [ ] Confirm routes match frontend paths from `FRONTEND_URL`.
+Acceptance: email copy matches Echo product language and links.",Medium,"MVP, Auth"
+IMP-001: Implement UploadUserFile storage + retrieval,"Problem: UploadUserFile/GetUserFile/ListUserFiles RPCs are unimplemented.
+Subtasks:
+- [ ] Add storage abstraction or local storage path (new package under `pkg` or `internal/domain/import`).
+- [ ] Implement UploadUserFile/GetUserFile/ListUserFiles in `internal/domain/import/handler/import_handler.go`.
+- [ ] Extend repo with list support in `internal/domain/import/repository/repository.go` and `postgres_repository.go`.
+- [ ] Enforce file size/checksum constraints from `pkg/db/migrations/0004_imports_payments_plaid.up.sql`.
+Acceptance: uploaded files are stored and retrievable with metadata.",High,"MVP, Import"
+IMP-002: Implement import job lifecycle APIs,"Problem: CreateImportJob/GetImportJob/ListImportJobs are unimplemented.
+Subtasks:
+- [ ] Add repo list method in `internal/domain/import/repository/repository.go` and `postgres_repository.go`.
+- [ ] Implement handler methods in `internal/domain/import/handler/import_handler.go`.
+- [ ] Decide sync vs async execution and update job status/progress in `internal/domain/import/service/service.go` or a worker.
+Acceptance: jobs show status transitions and progress counters.",High,"MVP, Import"
+IMP-003: Save and reuse CSV mappings,"Problem: mappings are detected but not persisted or reused.
+Subtasks:
+- [ ] Add RPC to save mappings (proto update + handler).
+- [ ] Persist actual delimiter/skip_lines in `internal/domain/import/service/service.go`.
+- [ ] Implement `ImportWithExistingMapping` in `internal/domain/import/service/service.go`.
+- [ ] Add tests in `internal/domain/import/service/service_test.go`.
+Acceptance: known fingerprints auto-import without re-mapping.",High,"MVP, Import"
+IMP-004: Make CSV import idempotent,"Problem: duplicate `external_id` fails COPY for re-imports.
+Subtasks:
+- [ ] Implement dedupe strategy in `internal/domain/import/repository/postgres_repository.go` (staging + upsert or prefilter).
+- [ ] Report duplicates in `ImportResult` and handler error formatting.
+- [ ] Add tests for re-import behavior.
+Acceptance: re-importing the same file does not fail and reports duplicates.",High,"MVP, Import, TechDebt"
+IMP-005: XLSX/document import v1,"Problem: only CSV ingestion exists; `documents` table is unused.
+Subtasks:
+- [ ] Add XLSX parser (new package under `internal/domain/import`).
+- [ ] Create document records using `documents` in `pkg/db/migrations/0004_imports_payments_plaid.up.sql`.
+- [ ] Add RPC to import XLSX (proto update + handler).
+- [ ] Map XLSX rows into `ParsedTransaction` in `internal/domain/import/service/service.go`.
+Acceptance: XLSX uploads produce transactions and document metadata.",High,"MVP, Import"
+FIN-001: Accounts CRUD (create/list),"Problem: accounts table exists but no RPCs or repo.
+Subtasks:
+- [ ] Add account repo/service under `internal/domain/finance`.
+- [ ] Implement CreateAccount/ListAccounts in `internal/domain/finance/handler/finance_handler.go`.
+- [ ] Add tests for account creation and listing.
+Acceptance: accounts can be created with currency/type and listed per user.",Urgent,"MVP, Finance"
+FIN-002: Categories CRUD (create/list),"Problem: categories table exists but no RPCs or repo.
+Subtasks:
+- [ ] Add category repo/service under `internal/domain/finance`.
+- [ ] Implement CreateCategory/ListCategories in `internal/domain/finance/handler/finance_handler.go`.
+- [ ] Add tests for categories.
+Acceptance: categories persist and list per user.",Urgent,"MVP, Finance"
+FIN-003: Transactions list endpoint,"Problem: ListTransactions RPC is unimplemented; repo exists.
+Subtasks:
+- [ ] Wire handler to `ImportRepository.ListTransactions` in `internal/domain/finance/handler/finance_handler.go`.
+- [ ] Validate filters/pagination and add search semantics.
+- [ ] Add tests for filtering and pagination.
+Acceptance: list endpoint returns total and filtered rows with stable ordering.",Urgent,"MVP, Finance"
+FIN-004: Goals CRUD + pacing,"Problem: goals table exists but no RPCs or logic.
+Subtasks:
+- [ ] Add goal repo/service under `internal/domain/finance`.
+- [ ] Implement CreateGoal/ListGoals in `internal/domain/finance/handler/finance_handler.go`.
+- [ ] Compute pacing/behind-plan fields in the service.
+Acceptance: goals return progress and pacing metadata.",High,"MVP, Finance"
+FIN-005: Recurring subscriptions list,"Problem: recurring_subscriptions table exists but no RPCs.
+Subtasks:
+- [ ] Add repo/service for `recurring_subscriptions`.
+- [ ] Implement ListRecurringSubscriptions in `internal/domain/finance/handler/finance_handler.go`.
+- [ ] Add tests for list filters.
+Acceptance: endpoint returns recurring items per user.",High,"MVP, Finance"
+NORM-001: Merchant normalization pipeline,"Problem: imports only clean description; `merchant_name` is unused.
+Subtasks:
+- [ ] Add merchant normalization rules table (new migration under `pkg/db/migrations`).
+- [ ] Extend `ParsedTransaction` with merchant name in `internal/domain/import/repository/repository.go`.
+- [ ] Populate `merchant_name` in `internal/domain/import/service/service.go` and insert in `postgres_repository.go`.
+- [ ] Add override endpoint for merchant name (new handler in finance or import domain).
+Acceptance: normalized merchant names are stored and can be overridden.",High,"MVP, Normalization"
+NORM-002: Categorization rules + user overrides,"Problem: category mapping from CSV is ignored and no override system exists.
+Subtasks:
+- [ ] Map CSV category text to `categories` on import (create if missing) in `internal/domain/import/service/service.go`.
+- [ ] Add rule/override storage (new migration under `pkg/db/migrations`).
+- [ ] Implement transaction category override RPC and persistence (finance handler + repo).
+Acceptance: overrides persist and show up in insights.",High,"MVP, Normalization"
+INS-001: Spending overview endpoint,"Problem: MVP needs top categories/merchants and trends; no API exists.
+Subtasks:
+- [ ] Add aggregation queries over `transactions` (new repo under `internal/domain/insights`).
+- [ ] Implement spending overview RPC (new handler/service or finance handler).
+- [ ] Add tests with known fixtures.
+Acceptance: endpoint returns MTD vs last month, top categories/merchants, and trend deltas.",Urgent,"MVP, Insights"
+INS-002: Monthly insights generator + API,"Problem: `monthly_insights` table exists but unused.
+Subtasks:
+- [ ] Build a monthly insights job (new service/worker).
+- [ ] Store results in `monthly_insights`.
+- [ ] Add RPC to fetch insights for a month.
+Acceptance: insights include highlights and one action prompt.",High,"MVP, Insights"
+INS-003: Mini-wrapped summaries,"Problem: `wrapped_summaries` table exists but unused.
+Subtasks:
+- [ ] Generate shareable card JSON and store in `wrapped_summaries`.
+- [ ] Add RPC to fetch wrapped summaries.
+- [ ] Apply privacy filters by default.
+Acceptance: wrapped payload returns share-safe cards.",High,"MVP, Insights"
+INS-004: Subscription detection job,"Problem: recurring charge detection is a core MVP feature but missing.
+Subtasks:
+- [ ] Implement recurring detection logic (merchant + cadence).
+- [ ] Update `recurring_subscriptions` with cadence/next_expected_at.
+- [ ] Schedule job or background runner.
+Acceptance: detection job populates recurring subscriptions for active users.",High,"MVP, Insights"
+FDN-001: Net worth entries + runway metric,"Problem: net worth tables exist but no API or calculations.
+Subtasks:
+- [ ] Add net worth repo/service under `internal/domain/foundation`.
+- [ ] Implement CRUD and snapshot generation (net_worth_entries/net_worth_snapshots).
+- [ ] Compute runway from average spend and balances.
+Acceptance: endpoint returns assets, liabilities, net, and runway.",High,"MVP, Foundation"
+GOAL-002: Goal burn rate insight,"Problem: README calls for burn-rate pacing but no logic.
+Subtasks:
+- [ ] Add forecast calculation to goals service.
+- [ ] Include projected completion date and ahead/behind flags in responses.
+- [ ] Add tests for pace calculations.
+Acceptance: goals show burn-rate projections.",Medium,"Pre-MVP, Goals"
+BYOS-001: Spreadsheet template upload + field mapping,"Problem: spreadsheet_templates/mappings tables exist but no APIs.
+Subtasks:
+- [ ] Implement template upload using `spreadsheet_templates` + `user_files`.
+- [ ] Add mapping CRUD for `spreadsheet_mappings`.
+- [ ] Add RPCs (proto update + handlers).
+Acceptance: mappings persist and can be retrieved for export.",Medium,"MVP, BYOS"
+BYOS-002: Export computed views (shareable/read-only),"Problem: BYOS requires export but no output path exists.
+Subtasks:
+- [ ] Generate computed views into a new XLSX or CSV (service under `internal/domain/byos`).
+- [ ] Add shareable export endpoint and signed URLs.
+- [ ] Exclude sensitive fields by default.
+Acceptance: exports are read-only and share-safe.",Medium,"MVP, BYOS"
+PAY-001: Stripe Checkout + entitlements (feature-flagged),"Problem: payments tables exist but no flows.
+Subtasks:
+- [ ] Implement checkout session creation and persist `payment_checkout_sessions`.
+- [ ] Add webhook handler with idempotency using `payment_webhook_events`.
+- [ ] Grant/revoke entitlements via `user_entitlements`.
+- [ ] Gate endpoints with feature flag in config.
+Acceptance: paid users receive premium entitlement and can be revoked on cancel.",Low,"Optional, Payments"
+PLAT-001: Make Gemini config optional,"Problem: app requires GEMINI env vars even though AI is post-MVP.
+Subtasks:
+- [ ] Gate Gemini config in `pkg/config/config.go` behind a feature flag or allow empty values.
+- [ ] Update `/health/details` in `cmd/api/router.go` to warn only.
+- [ ] Update README or config docs if needed.
+Acceptance: server starts without GEMINI variables and health shows a warning only.",Urgent,"MVP, Platform, TechDebt"

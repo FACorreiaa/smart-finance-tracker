@@ -65,8 +65,9 @@ type ImportResult struct {
 
 // ImportOptions allows callers to override detected file settings.
 type ImportOptions struct {
-	HeaderRows int
-	Timezone   string
+	HeaderRows      int
+	Timezone        string
+	InstitutionName string // Name of the bank/institution for this import
 }
 
 // ImportService orchestrates file analysis and import operations
@@ -270,7 +271,7 @@ func (s *ImportService) ImportWithOptions(ctx context.Context, userID uuid.UUID,
 		if len(batch) == 0 {
 			return nil
 		}
-		imported, err := s.repo.BulkInsertTransactions(ctx, userID, accountID, currencyCode, batch)
+		imported, err := s.repo.BulkInsertTransactions(ctx, userID, accountID, currencyCode, job.ID, opts.InstitutionName, batch)
 		if err != nil {
 			return err
 		}
@@ -439,7 +440,7 @@ func (s *ImportService) parseTransactionsStream(ctx context.Context, fileData []
 }
 
 // parseRow converts a CSV row into a ParsedTransaction
-func (s *ImportService) parseRow(record []string, mapping ColumnMapping, lineNum int) (*repository.ParsedTransaction, error) {
+func (s *ImportService) parseRow(record []string, mapping ColumnMapping, _ int) (*repository.ParsedTransaction, error) {
 	// Validate column indices
 	maxCol := len(record) - 1
 	if mapping.DateCol > maxCol || mapping.DescCol > maxCol {
